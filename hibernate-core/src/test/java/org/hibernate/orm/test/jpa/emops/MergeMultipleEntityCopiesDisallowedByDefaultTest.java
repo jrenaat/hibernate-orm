@@ -129,31 +129,31 @@ public class MergeMultipleEntityCopiesDisallowedByDefaultTest {
 
 		scope.inEntityManager(
 				entityManager -> {
-					Item item1Merged = null;
+					Item item1Merged;
 					try {
 						entityManager.getTransaction().begin();
 						item1Merged = entityManager.merge( item1 );
+
+						item1Merged.setCategory( category );
+						category.setExampleItem( item1_1 );
+
+						// now item1Merged is managed and it has a nested detached item
+						try {
+							entityManager.merge( item1Merged );
+							fail( "should have failed due to IllegalStateException" );
+						}
+						catch (IllegalStateException ex) {
+							//expected
+						}
+						finally {
+							entityManager.getTransaction().rollback();
+						}
 					}
 					catch (Exception e) {
 						if ( entityManager.getTransaction().isActive() ) {
 							entityManager.getTransaction().rollback();
 						}
 						throw e;
-					}
-
-					item1Merged.setCategory( category );
-					category.setExampleItem( item1_1 );
-
-					// now item1Merged is managed and it has a nested detached item
-					try {
-						entityManager.merge( item1Merged );
-						fail( "should have failed due to IllegalStateException" );
-					}
-					catch (IllegalStateException ex) {
-						//expected
-					}
-					finally {
-						entityManager.getTransaction().rollback();
 					}
 				}
 		);

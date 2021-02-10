@@ -91,7 +91,7 @@ public class RemoveTest {
 	}
 
 	@Test
-	public void testUpdatedAndRemove(EntityManagerFactoryScope scope) throws Exception {
+	public void testUpdatedAndRemove(EntityManagerFactoryScope scope) {
 		EntityManager em = scope.getEntityManagerFactory().createEntityManager();
 		EntityManager em2 = scope.getEntityManagerFactory().createEntityManager();
 		try {
@@ -136,7 +136,11 @@ public class RemoveTest {
 			em.getTransaction().begin();
 			em.remove( em.find( Music.class, music.getId() ) );
 			em.getTransaction().commit();
-			em.close();
+		}
+		catch (Exception e) {
+			if ( em.getTransaction().isActive() ) {
+				em.getTransaction().rollback();
+			}
 		}
 		finally {
 			em.close();
