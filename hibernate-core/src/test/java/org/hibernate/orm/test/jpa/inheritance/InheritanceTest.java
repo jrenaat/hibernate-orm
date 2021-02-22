@@ -41,7 +41,6 @@ public class InheritanceTest {
 
 						// 2.
 						Strawberry result2 = (Strawberry) entityManager.find(Fruit.class, newId);
-						System.out.println("2. result is:" + result2);
 
 						entityManager.getTransaction().commit();
 					}

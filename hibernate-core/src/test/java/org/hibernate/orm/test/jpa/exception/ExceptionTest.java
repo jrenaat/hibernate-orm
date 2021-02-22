@@ -165,6 +165,7 @@ public class ExceptionTest {
 		}
 		catch ( RuntimeException e ) {
 			assertTrue( em.getTransaction().getRollbackOnly() );
+			em.getTransaction().rollback();
 		}
 		finally {
 			em.close();

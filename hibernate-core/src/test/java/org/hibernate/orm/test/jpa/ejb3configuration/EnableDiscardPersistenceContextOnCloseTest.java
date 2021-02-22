@@ -58,7 +58,13 @@ public class EnableDiscardPersistenceContextOnCloseTest {
 						assertEquals( 1, connectionProvider.getAcquiredConnections().size() );
 						entityManager.close();
 						assertEquals( 0, connectionProvider.getAcquiredConnections().size() );
-						assertTrue(entityManager.getTransaction().isActive());
+						assertTrue( entityManager.getTransaction().isActive() );
+						try {
+							entityManager.getTransaction().rollback();
+							fail( "Should throw IllegalStateException because the Connection is already closed!" );
+						}
+						catch (IllegalStateException expected) {
+						}
 					}
 					catch (Exception e) {
 						if ( entityManager.getTransaction().isActive() ) {
@@ -66,12 +72,7 @@ public class EnableDiscardPersistenceContextOnCloseTest {
 						}
 						throw e;
 					}
-					try {
-						entityManager.getTransaction().rollback();
-						fail("Should throw IllegalStateException because the Connection is already closed!");
-					}
-					catch ( IllegalStateException expected ) {
-					}
+
 				}
 		);
 	}

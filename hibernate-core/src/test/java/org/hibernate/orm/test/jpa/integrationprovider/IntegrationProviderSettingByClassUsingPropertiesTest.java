@@ -7,51 +7,33 @@
 package org.hibernate.orm.test.jpa.integrationprovider;
 
 import java.util.List;
-import java.util.Properties;
 
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
-import org.hibernate.jpa.boot.spi.PersistenceUnitDescriptor;
 
 import org.hibernate.testing.TestForIssue;
-import org.hibernate.testing.junit5.EntityManagerFactoryBasedFunctionalTest;
+import org.hibernate.testing.orm.junit.EntityManagerFactoryScope;
+import org.hibernate.testing.orm.junit.Jpa;
+import org.hibernate.testing.orm.junit.Setting;
 import org.junit.jupiter.api.Test;
-
-import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
 
 /**
  * @author Vlad Mihalcea
  */
 @TestForIssue(jiraKey = "HHHH-13853")
-public class IntegrationProviderSettingByClassUsingPropertiesTest extends EntityManagerFactoryBasedFunctionalTest {
-
-	@Override
-	protected Class<?>[] getAnnotatedClasses() {
-		return new Class<?>[] {
-				Person.class
-		};
-	}
+@Jpa(
+		annotatedClasses = Person.class,
+		properties = @Setting(name = EntityManagerFactoryBuilderImpl.INTEGRATOR_PROVIDER, value = "org.hibernate.orm.test.jpa.integrationprovider.DtoIntegratorProvider")
+)
+public class IntegrationProviderSettingByClassUsingPropertiesTest {
 
 	@Test
-	public void test() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
+	public void test(EntityManagerFactoryScope scope) {
+		scope.inTransaction( entityManager -> {
 			List<PersonDto> dtos = entityManager.createQuery(
 					"select new PersonDto(id, name) " +
-					"from Person", PersonDto.class )
-			.getResultList();
+							"from Person", PersonDto.class )
+					.getResultList();
 		} );
 	}
 
-	protected PersistenceUnitDescriptor buildPersistenceUnitDescriptor() {
-		return new TestingPersistenceUnitDescriptorImpl( getClass().getSimpleName() ) {
-			@Override
-			public Properties getProperties() {
-				Properties properties = new Properties();
-				properties.put(
-						EntityManagerFactoryBuilderImpl.INTEGRATOR_PROVIDER,
-						DtoIntegratorProvider.class.getName()
-				);
-				return properties;
-			}
-		};
-	}
 }
