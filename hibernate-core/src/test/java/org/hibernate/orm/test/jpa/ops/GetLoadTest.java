@@ -83,10 +83,10 @@ public class GetLoadTest {
 		scope.inTransaction(
 				entityManager -> {
 					Session s = ( Session ) entityManager.getDelegate();
-					Employer emp = ( Employer ) s.get( Employer.class, empId );
+					Employer emp = s.get( Employer.class, empId );
 					assertTrue( Hibernate.isInitialized( emp ) );
 					assertFalse( Hibernate.isInitialized( emp.getEmployees() ) );
-					Node node = ( Node ) s.get( Node.class, nodeName );
+					Node node = s.get( Node.class, nodeName );
 					assertTrue( Hibernate.isInitialized( node ) );
 					assertFalse( Hibernate.isInitialized( node.getChildren() ) );
 					assertFalse( Hibernate.isInitialized( node.getParent() ) );
@@ -130,10 +130,10 @@ public class GetLoadTest {
 		scope.inTransaction(
 				entityManager -> {
 					Session s = ( Session ) entityManager.getDelegate();
-					Employer emp = ( Employer ) s.load( Employer.class, empId );
+					Employer emp = s.load( Employer.class, empId );
 					emp.getId();
 					assertFalse( Hibernate.isInitialized( emp ) );
-					Node node = ( Node ) s.load( Node.class, nodeName );
+					Node node = s.load( Node.class, nodeName );
 					assertEquals( node.getName(), nodeName );
 					assertFalse( Hibernate.isInitialized( node ) );
 				}

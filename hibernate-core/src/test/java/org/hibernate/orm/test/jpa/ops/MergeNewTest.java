@@ -56,22 +56,23 @@ public class MergeNewTest {
 	@Test
 	public void testMergeAfterRemove(EntityManagerFactoryScope scope) {
 
-		Workload load = scope.fromTransaction(
+		Integer load_id = scope.fromTransaction(
 				entityManager -> {
 					Workload _load = new Workload();
 					_load.name = "Cleaning";
 					_load.load = 10;
 					_load = entityManager.merge( _load );
 					entityManager.flush();
-					return _load;
+					return _load.getId();
 				}
 		);
 
-		scope.inTransaction(
+		Workload load =scope.fromTransaction(
 				entityManager -> {
-					Workload _load = entityManager.find( Workload.class, load.id );
+					Workload _load = entityManager.find( Workload.class, load_id );
 					entityManager.remove( _load );
 					entityManager.flush();
+					return _load;
 				}
 		);
 

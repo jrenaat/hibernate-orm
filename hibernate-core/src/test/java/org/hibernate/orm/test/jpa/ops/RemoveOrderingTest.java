@@ -40,27 +40,17 @@ public class RemoveOrderingTest {
 	public void testManyToOne(EntityManagerFactoryScope scope) {
 		scope.inTransaction(
 				entityManager -> {
-					try {
-						Company company = new Company( 1, "acme" );
-						Person person = new Person( 1, "joe", company );
-						entityManager.persist( person );
-						entityManager.flush();
+					Company company = new Company( 1, "acme" );
+					Person person = new Person( 1, "joe", company );
+					entityManager.persist( person );
+					entityManager.flush();
 
-						entityManager.remove( company );
-						entityManager.remove( person );
-						entityManager.flush();
+					entityManager.remove( company );
+					entityManager.remove( person );
+					entityManager.flush();
 
-						entityManager.persist( person );
-						entityManager.flush();
-
-						entityManager.getTransaction().commit();
-					}
-					catch (Exception e) {
-						if ( entityManager.getTransaction().isActive() ) {
-							entityManager.getTransaction().rollback();
-						}
-						throw e;
-					}
+					entityManager.persist( person );
+					entityManager.flush();
 				}
 		);
 	}

@@ -43,90 +43,67 @@ public class MergeTest {
 
 	@Test
 	public void testMergeTree(EntityManagerFactoryScope scope) {
-		clearCounts(scope);
+		clearCounts( scope );
 
-		scope.inEntityManager(
+		Node root = new Node( "root" );
+		Node child = new Node( "child" );
+
+		scope.inTransaction(
 				entityManager -> {
-					try {
-						entityManager.getTransaction().begin();
-						Node root = new Node( "root" );
-						Node child = new Node( "child" );
-						root.addChild( child );
-						entityManager.persist( root );
-						entityManager.getTransaction().commit();
-						entityManager.close();
-
-						assertInsertCount( scope, 2 );
-						clearCounts(scope);
-
-						root.setDescription( "The root node" );
-						child.setDescription( "The child node" );
-
-						Node secondChild = new Node( "second child" );
-
-						root.addChild( secondChild );
-
-						entityManager = scope.getEntityManagerFactory().createEntityManager();
-						entityManager.getTransaction().begin();
-						entityManager.merge( root );
-						entityManager.getTransaction().commit();
-						entityManager.close();
-
-						assertInsertCount( scope, 1 );
-						assertUpdateCount( scope, 2 );
-					}
-					catch (Exception e) {
-						if ( entityManager.getTransaction().isActive() ) {
-							entityManager.getTransaction().rollback();
-						}
-						throw e;
-					}
+					root.addChild( child );
+					entityManager.persist( root );
 				}
 		);
+
+		assertInsertCount( scope, 2 );
+		clearCounts( scope );
+
+		root.setDescription( "The root node" );
+		child.setDescription( "The child node" );
+
+		Node secondChild = new Node( "second child" );
+
+		root.addChild( secondChild );
+
+		scope.inTransaction(
+				entityManager ->
+						entityManager.merge( root )
+		);
+
+		assertInsertCount( scope, 1 );
+		assertUpdateCount( scope, 2 );
 	}
 
 	@Test
 	public void testMergeTreeWithGeneratedId(EntityManagerFactoryScope scope) {
-		clearCounts(scope);
+		clearCounts( scope );
 
-		scope.inEntityManager(
-				entityManager -> {
-					try {
-						entityManager.getTransaction().begin();
-						NumberedNode root = new NumberedNode( "root" );
-						NumberedNode child = new NumberedNode( "child" );
-						root.addChild( child );
-						entityManager.persist( root );
-						entityManager.getTransaction().commit();
-						entityManager.close();
+		NumberedNode root = new NumberedNode( "root" );
+		NumberedNode child = new NumberedNode( "child" );
+		root.addChild( child );
 
-						assertInsertCount( scope, 2 );
-						clearCounts(scope);
-
-						root.setDescription( "The root node" );
-						child.setDescription( "The child node" );
-
-						NumberedNode secondChild = new NumberedNode( "second child" );
-
-						root.addChild( secondChild );
-
-						entityManager = scope.getEntityManagerFactory().createEntityManager();
-						entityManager.getTransaction().begin();
-						entityManager.merge( root );
-						entityManager.getTransaction().commit();
-						entityManager.close();
-
-						assertInsertCount( scope, 1 );
-						assertUpdateCount( scope, 2 );
-					}
-					catch (Exception e) {
-						if ( entityManager.getTransaction().isActive() ) {
-							entityManager.getTransaction().rollback();
-						}
-						throw e;
-					}
-				}
+		scope.inTransaction(
+				entityManager ->
+						entityManager.persist( root )
 		);
+
+		assertInsertCount( scope, 2 );
+		clearCounts( scope );
+
+		root.setDescription( "The root node" );
+		child.setDescription( "The child node" );
+
+		NumberedNode secondChild = new NumberedNode( "second child" );
+
+		root.addChild( secondChild );
+
+		scope.inTransaction(
+				entityManager ->
+						entityManager.merge( root )
+		);
+
+		assertInsertCount( scope, 1 );
+		assertUpdateCount( scope, 2 );
 	}
 
 	private void clearCounts(EntityManagerFactoryScope scope) {
@@ -134,12 +111,18 @@ public class MergeTest {
 	}
 
 	private void assertInsertCount(EntityManagerFactoryScope scope, int count) {
-		int inserts = ( int ) scope.getEntityManagerFactory().unwrap( SessionFactoryImplementor.class ).getStatistics().getEntityInsertCount();
+		int inserts = (int) scope.getEntityManagerFactory()
+				.unwrap( SessionFactoryImplementor.class )
+				.getStatistics()
+				.getEntityInsertCount();
 		Assertions.assertEquals( count, inserts );
 	}
 
 	private void assertUpdateCount(EntityManagerFactoryScope scope, int count) {
-		int updates = ( int ) scope.getEntityManagerFactory().unwrap( SessionFactoryImplementor.class ).getStatistics().getEntityUpdateCount();
+		int updates = (int) scope.getEntityManagerFactory()
+				.unwrap( SessionFactoryImplementor.class )
+				.getStatistics()
+				.getEntityUpdateCount();
 		Assertions.assertEquals( count, updates );
 	}
 }
