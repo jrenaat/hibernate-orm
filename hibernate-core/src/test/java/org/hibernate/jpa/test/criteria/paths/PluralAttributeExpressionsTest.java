@@ -6,18 +6,9 @@
  */
 package org.hibernate.jpa.test.criteria.paths;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.jpa.test.metamodel.AbstractMetamodelSpecificTest;
-import org.hibernate.jpa.test.metamodel.Address;
-import org.hibernate.jpa.test.metamodel.Address_;
 import org.hibernate.jpa.test.metamodel.Article;
 import org.hibernate.jpa.test.metamodel.Article_;
 import org.hibernate.jpa.test.metamodel.MapEntity;
@@ -27,99 +18,107 @@ import org.hibernate.jpa.test.metamodel.Translation;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaExpression;
 
-import org.hibernate.testing.FailureExpected;
 import org.hibernate.testing.TestForIssue;
-import org.junit.Test;
+import org.hibernate.testing.orm.domain.StandardDomainModel;
+import org.hibernate.testing.orm.domain.eclectic.Address;
+import org.hibernate.testing.orm.domain.eclectic.Address_;
+import org.hibernate.testing.orm.junit.EntityManagerFactoryScope;
+import org.hibernate.testing.orm.junit.Jpa;
 
-import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Steve Ebersole
  */
-public class PluralAttributeExpressionsTest extends AbstractMetamodelSpecificTest {
-	@Override
-	public Class[] getAnnotatedClasses() {
-		List<Class> classes = new ArrayList<>();
-		Collections.addAll( classes, super.getAnnotatedClasses() );
-		classes.add( MapEntity.class );
-		classes.add( MapEntityLocal.class );
-		classes.add( Article.class );
-		classes.add( Translation.class );
-
-		return classes.toArray( new Class[ classes.size() ] );
-	}
+@Jpa(
+		annotatedClasses = {
+				MapEntity.class,
+				MapEntityLocal.class,
+				Article.class,
+				Translation.class
+		},
+		standardModels = { StandardDomainModel.ECLECTIC }
+)
+public class PluralAttributeExpressionsTest {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// IS [NOT] EMPTY
 
 	@Test
-	public void testCollectionIsEmptyHql() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			entityManager.createQuery( "select a from Address a where a.phones is empty" ).getResultList();
-		});
+	public void testCollectionIsEmptyHql(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> entityManager.createQuery( "select a from Address a where a.phones is empty" ).getResultList()
+		);
 	}
 
 	@Test
-	public void testCollectionIsEmptyCriteria() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
+	public void testCollectionIsEmptyCriteria(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> {
+					final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
 
-			final CriteriaQuery<Address> criteria = cb.createQuery( Address.class );
-			final Root<Address> root = criteria.from( Address.class);
+					final CriteriaQuery<Address> criteria = cb.createQuery( Address.class );
+					final Root<Address> root = criteria.from( Address.class);
 
-			criteria.select( root )
-					.where( cb.isEmpty( root.get( Address_.phones ) ) );
+					criteria.select( root )
+							.where( cb.isEmpty( root.get( Address_.phones ) ) );
 
-			entityManager.createQuery( criteria ).getResultList();
-		});
-	}
-
-	@Test
-	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testElementMapIsEmptyHql() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			entityManager.createQuery( "select m from MapEntity m where m.localized is empty" ).getResultList();
-		});
+					entityManager.createQuery( criteria ).getResultList();
+				}
+		);
 	}
 
 	@Test
 	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testElementMapIsEmptyCriteria() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
+	public void testElementMapIsEmptyHql(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> entityManager.createQuery( "select m from MapEntity m where m.localized is empty" ).getResultList()
+		);
+	}
 
-			final CriteriaQuery<MapEntity> criteria = cb.createQuery( MapEntity.class );
-			final Root<MapEntity> root = criteria.from( MapEntity.class);
 
-			criteria.select( root )
-					.where( cb.isMapEmpty( (JpaExpression) root.get( MapEntity_.localized ) ) );
+	@Test
+	@TestForIssue( jiraKey = "HHH-11225" )
+	public void testElementMapIsEmptyCriteria(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> {
+					final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
 
-			entityManager.createQuery( criteria ).getResultList();
-		});
+					final CriteriaQuery<MapEntity> criteria = cb.createQuery( MapEntity.class );
+					final Root<MapEntity> root = criteria.from( MapEntity.class);
+
+					criteria.select( root )
+							.where( cb.isMapEmpty( (JpaExpression) root.get( MapEntity_.localized ) ) );
+
+					entityManager.createQuery( criteria ).getResultList();
+				}
+		);
 	}
 
 	@Test
 	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testEntityMapIsEmptyHql() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			entityManager.createQuery( "select a from Article a where a.translations is empty" ).getResultList();
-		});
+	public void testEntityMapIsEmptyHql(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> entityManager.createQuery( "select a from Article a where a.translations is empty" ).getResultList()
+		);
 	}
 
 	@Test
 	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testEntityMapIsEmptyCriteria() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
+	public void testEntityMapIsEmptyCriteria(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> {
+					final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
 
-			final CriteriaQuery<Article> criteria = cb.createQuery( Article.class );
-			final Root<Article> root = criteria.from( Article.class);
+					final CriteriaQuery<Article> criteria = cb.createQuery( Article.class );
+					final Root<Article> root = criteria.from( Article.class);
 
-			criteria.select( root )
-					.where( cb.isEmpty( root.get( Article_.translations ) ) );
+					criteria.select( root )
+							.where( cb.isEmpty( root.get( Article_.translations ) ) );
 
-			entityManager.createQuery( criteria ).getResultList();
-		});
+					entityManager.createQuery( criteria ).getResultList();
+				}
+		);
 	}
 
 
@@ -127,73 +126,78 @@ public class PluralAttributeExpressionsTest extends AbstractMetamodelSpecificTes
 	// SIZE
 
 	@Test
-	public void testCollectionSizeHql() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			entityManager.createQuery( "select a from Address a where size(a.phones) > 1" ).getResultList();
-		});
+	public void testCollectionSizeHql(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> entityManager.createQuery( "select a from Address a where size(a.phones) > 1" ).getResultList()
+		);
 	}
 
 	@Test
-	public void testCollectionSizeCriteria() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
+	public void testCollectionSizeCriteria(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> {
+					final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
 
-			final CriteriaQuery<Address> criteria = cb.createQuery( Address.class );
-			final Root<Address> root = criteria.from( Address.class);
+					final CriteriaQuery<Address> criteria = cb.createQuery( Address.class );
+					final Root<Address> root = criteria.from( Address.class);
 
-			criteria.select( root )
-					.where( cb.gt( cb.size( root.get( Address_.phones ) ), 1 ) );
+					criteria.select( root )
+							.where( cb.gt( cb.size( root.get( Address_.phones ) ), 1 ) );
 
-			entityManager.createQuery( criteria ).getResultList();
-		});
-	}
-
-	@Test
-	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testElementMapSizeHql() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			entityManager.createQuery( "select m from MapEntity m where size( m.localized ) > 1" ).getResultList();
-		});
+					entityManager.createQuery( criteria ).getResultList();
+				}
+		);
 	}
 
 	@Test
 	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testElementMapSizeCriteria() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
-
-			final CriteriaQuery<MapEntity> criteria = cb.createQuery( MapEntity.class );
-			final Root<MapEntity> root = criteria.from( MapEntity.class);
-
-			criteria.select( root )
-					.where( cb.gt( cb.mapSize( (JpaExpression) root.get( MapEntity_.localized ) ), 1 ) );
-
-			entityManager.createQuery( criteria ).getResultList();
-		});
+	public void testElementMapSizeHql(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> entityManager.createQuery( "select m from MapEntity m where size( m.localized ) > 1" ).getResultList()
+		);
 	}
 
 	@Test
 	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testEntityMapSizeHql() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			entityManager.createQuery( "select a from Article a where size(a.translations) > 1" ).getResultList();
-		});
+	public void testElementMapSizeCriteria(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> {
+					final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
+
+					final CriteriaQuery<MapEntity> criteria = cb.createQuery( MapEntity.class );
+					final Root<MapEntity> root = criteria.from( MapEntity.class);
+
+					criteria.select( root )
+							.where( cb.gt( cb.mapSize( (JpaExpression) root.get( MapEntity_.localized ) ), 1 ) );
+
+					entityManager.createQuery( criteria ).getResultList();
+				}
+		);
 	}
 
 	@Test
 	@TestForIssue( jiraKey = "HHH-11225" )
-	public void testEntityMapSizeCriteria() {
-		doInJPA( this::entityManagerFactory, entityManager -> {
-			final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
-
-			final CriteriaQuery<Article> criteria = cb.createQuery( Article.class );
-			final Root<Article> root = criteria.from( Article.class);
-
-			criteria.select( root )
-					.where( cb.gt( cb.mapSize( (JpaExpression) root.get( Article_.translations ) ), 1 ) );
-
-			entityManager.createQuery( criteria ).getResultList();
-		});
+	public void testEntityMapSizeHql(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> entityManager.createQuery( "select a from Article a where size(a.translations) > 1" ).getResultList()
+		);
 	}
 
+	@Test
+	@TestForIssue( jiraKey = "HHH-11225" )
+	public void testEntityMapSizeCriteria(EntityManagerFactoryScope scope) {
+		scope.inTransaction(
+				entityManager -> {
+					final HibernateCriteriaBuilder cb = (HibernateCriteriaBuilder) entityManager.getCriteriaBuilder();
+
+					final CriteriaQuery<Article> criteria = cb.createQuery( Article.class );
+					final Root<Article> root = criteria.from( Article.class);
+
+					criteria.select( root )
+							.where( cb.gt( cb.mapSize( (JpaExpression) root.get( Article_.translations ) ), 1 ) );
+
+					entityManager.createQuery( criteria ).getResultList();
+				}
+		);
+	}
 }
