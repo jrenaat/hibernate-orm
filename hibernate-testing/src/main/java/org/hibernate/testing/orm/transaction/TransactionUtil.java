@@ -9,11 +9,16 @@ package org.hibernate.testing.orm.transaction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.persistence.EntityManager;
+import javax.transaction.Status;
+import javax.transaction.TransactionManager;
 
 import org.hibernate.SharedSessionContract;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 import org.hibernate.engine.spi.SessionImplementor;
+
+import org.hibernate.testing.jta.TestingJtaPlatformImpl;
+import org.hibernate.testing.orm.junit.EntityManagerFactoryScope;
 
 import org.jboss.logging.Logger;
 
@@ -143,4 +148,35 @@ public abstract class TransactionUtil {
 		}
 	}
 
+	public static void doSafeJtaTransaction(TryProvider<EntityManager> tryProvider) throws Exception {
+		TransactionManager transactionManager = TestingJtaPlatformImpl.INSTANCE.getTransactionManager();
+		EntityManager entityManager = null;
+		try {
+			entityManager = tryProvider.apply( transactionManager );
+		}
+		catch (Exception e) {
+			doJtaRollback( transactionManager );
+			throw e;
+		} catch (AssertionError ae) {
+			doJtaRollback( transactionManager );
+			throw ae;
+		}
+		finally {
+			if (entityManager != null && entityManager.isOpen()) {
+				entityManager.close();
+			}
+		}
+	}
+
+	private static void doJtaRollback(TransactionManager transactionManager) throws Exception{
+		int status = transactionManager.getStatus();
+		if ( status == Status.STATUS_ACTIVE || status == Status.STATUS_MARKED_ROLLBACK ) {
+			transactionManager.rollback();
+		}
+	}
+
+	@FunctionalInterface
+	public interface TryProvider<T> {
+		T apply(TransactionManager transactionManager) throws Exception;
+	}
 }
