@@ -76,11 +76,11 @@ include::{sourcedir}/basic/ImplicitBasicTypeTest.java[tags=basic-annotation-impl
 
 The `@Basic` annotation defines 2 attributes.
 
-`optional` - boolean (defaults to true):: Defines whether this attribute allows nulls.  Jakarta Persistence defines
-    this as "a hint", which means the provider is free to ignore it.  Jakarta Persistence also says that it will be
+`optional` - boolean (defaults to true):: Defines whether this [.line-through]#attribute# field allows nulls.  Jakarta Persistence defines
+    this annotation attribute as "a hint", which means the provider is free to ignore it.  Jakarta Persistence also says that it will be
     ignored if the type is primitive.  As long as the type is not primitive, Hibernate will honor this
     value.  Works in conjunction with `@Column#nullable` - see <<basic-column-annotation>>.
-`fetch` - FetchType (defaults to EAGER):: Defines whether this attribute should be fetched eagerly or lazily.
+`fetch` - FetchType (defaults to EAGER):: Defines whether this [.line-through]#attribute# field should be fetched eagerly or lazily.
     `EAGER` indicates that the value will be fetched as part of loading the owner.  `LAZY` values are
     fetched only when the value is accessed.  Jakarta Persistence requires providers to support `EAGER`, while support for
     `LAZY` is optional meaning that a provider is free to not support it.  Hibernate supports lazy loading
@@ -186,7 +186,7 @@ This section covers how Hibernate determines these pieces and how to influence t
 [NOTE]
 ====
 The following sections focus on approaches introduced in version 6 to influence how Hibernate will
-map basic value to the database.
+map basic values to the database.
 
 This includes removal of the following deprecated legacy annotations:
 
