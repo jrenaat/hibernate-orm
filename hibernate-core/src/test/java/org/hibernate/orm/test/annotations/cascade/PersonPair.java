@@ -13,7 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 
 @Embeddable
 class PersonPair implements Serializable {
@@ -21,13 +21,11 @@ class PersonPair implements Serializable {
 	private static final long serialVersionUID = 4543565503074112720L;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
-	@JoinColumn(name = "LEFT_PERSON_ID", nullable = false, updatable = false)
-	@ForeignKey(name = "FK_LEFT_PERSON")
+	@JoinColumn(name = "LEFT_PERSON_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_LEFT_PERSON"))
 	private Person left;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
-	@JoinColumn(name = "RIGHT_PERSON_ID", nullable = false, updatable = false)
-	@ForeignKey(name = "FK_RIGHT_PERSON")
+	@JoinColumn(name = "RIGHT_PERSON_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RIGHT_PERSON"))
 	private Person right;
 
 	PersonPair() {

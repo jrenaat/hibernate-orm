@@ -15,7 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Version;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
@@ -35,8 +35,7 @@ public class MultipleCollectionRefEntity2 {
 	private String text;
 
 	@ManyToOne
-	@JoinColumn(name = "MCE_ID", nullable = false, insertable = false, updatable = false)
-	@ForeignKey(name = "FK_RE2_MCE")
+	@JoinColumn(name = "MCE_ID", nullable = false, insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RE2_MCE"))
 	@NotAudited
 	private MultipleCollectionEntity multipleCollectionEntity;
 

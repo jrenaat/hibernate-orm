@@ -12,10 +12,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -119,11 +120,11 @@ public class ImplicitCompositeKeyJoinTest {
 	@Table(name = "Employee")
 	public class Employee {
 		@EmbeddedId
-		@ForeignKey(name = "none")
+		@JoinColumn(foreignKey = @ForeignKey(name="none"))
 		private EmployeeId id;
 
 		@ManyToOne(optional = true)
-		@ForeignKey(name = "none")
+		@JoinColumn(foreignKey = @ForeignKey(name="none"))
 		private Employee manager;
 	}
 

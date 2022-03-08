@@ -6,18 +6,18 @@
  */
 package org.hibernate.orm.test.envers.entities.collection;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.NotAudited;
 
 @Entity
 @Audited
@@ -35,8 +35,7 @@ public class MultipleCollectionRefEntity1 {
 	private String text;
 
 	@ManyToOne
-	@JoinColumn(name = "MCE_ID", nullable = false, insertable = false, updatable = false)
-	@ForeignKey(name = "FK_RE1_MCE")
+	@JoinColumn(name = "MCE_ID", nullable = false, insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_RE1_MCE"))
 	@NotAudited
 	private MultipleCollectionEntity multipleCollectionEntity;
 

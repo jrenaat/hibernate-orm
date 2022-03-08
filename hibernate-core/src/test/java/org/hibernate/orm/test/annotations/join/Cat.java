@@ -18,7 +18,7 @@ import jakarta.persistence.SecondaryTables;
 import jakarta.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.SQLInsert;
 import org.hibernate.annotations.Table;
@@ -29,11 +29,11 @@ import org.hibernate.annotations.Table;
 @Entity
 @SecondaryTables({
 @SecondaryTable(name = "`Cat nbr1`"),
-@SecondaryTable(name = "Cat2", uniqueConstraints = {@UniqueConstraint(columnNames = {"storyPart2"})})
+@SecondaryTable(name = "Cat2", uniqueConstraints = {@UniqueConstraint(columnNames = {"storyPart2"})}, foreignKey = @ForeignKey(name="FK_CAT2_CAT"))
 		})
 @Table(appliesTo = "Cat", indexes = @Index(name = "secondname",
 		columnNames = "secondName"), comment = "My cat table" )
-@Table(appliesTo = "Cat2", foreignKey = @ForeignKey(name="FK_CAT2_CAT"), fetch = FetchMode.SELECT,
+@Table(appliesTo = "Cat2", fetch = FetchMode.SELECT,
 		sqlInsert=@SQLInsert(sql="insert into Cat2(storyPart2, id) values(upper(?), ?)") )
 public class Cat implements Serializable {
 

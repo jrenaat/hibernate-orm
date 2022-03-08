@@ -11,13 +11,15 @@ package org.hibernate.orm.test.annotations.inheritance.joined;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SecondaryTable;
 
 /**
  * @author Emmanuel Bernard
  */
 @Entity
-@ForeignKey(name = "FK_DOCU_FILE")
+@SecondaryTable( name = "file", foreignKey = @ForeignKey(name = "FK_DOCU_FILE"))
 public class Document extends File {
 	@Column(nullable = false, name="xsize")
 	private int size;

@@ -16,7 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 import org.hibernate.annotations.Immutable;
 
 /**
@@ -58,8 +58,7 @@ class City {
 	}
 
 	@OneToMany
-	@JoinColumn(name = "mainstreetcity_id")
-	@ForeignKey(name = "CITYSTR_FK")
+	@JoinColumn(name = "mainstreetcity_id", foreignKey = @ForeignKey(name = "CITYSTR_FK"))
 	@OrderBy
 	@Immutable
 	public List<Street> getMainStreets() {

@@ -73,7 +73,7 @@ public class OneToManyBidirectionalForeignKeyTest {
 
 		@OneToMany(mappedBy = "parent")
 		// workaround
-		// @org.hibernate.annotations.ForeignKey(name = "none")
+		// @jakarta.persistence.ForeignKey(name = "none")
 		private Collection<PlainTreeEntity> children = new ArrayList<>(0);
 	}
 

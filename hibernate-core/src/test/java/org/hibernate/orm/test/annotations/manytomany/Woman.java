@@ -16,7 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 
 /**
  * Woman knowing several mens
@@ -50,9 +50,10 @@ public class Woman implements Serializable {
 			@JoinColumn(name = "manIsElder", referencedColumnName = "elder"),
 			@JoinColumn(name = "manLastName", referencedColumnName = "lastName"),
 			@JoinColumn(name = "manFirstName", referencedColumnName = "firstName")
-					}
+					},
+			foreignKey = @ForeignKey(name = "WM_W_FK"),
+			inverseForeignKey = @ForeignKey(name = "WM_M_FK")
 	)
-	@ForeignKey(name = "WM_W_FK", inverseName = "WM_M_FK")
 	public Set<Man> getMens() {
 		return mens;
 	}

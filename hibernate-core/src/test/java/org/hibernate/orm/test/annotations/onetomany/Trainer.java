@@ -15,7 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 
 /**
  * Unidirectional one to many sample
@@ -61,9 +61,10 @@ public class Trainer {
 			name = "TrainedMonkeys",
 			//columns are optional, here we explicit them
 			joinColumns = @JoinColumn(name = "trainer_id"),
-			inverseJoinColumns = @JoinColumn(name = "monkey_id")
+			inverseJoinColumns = @JoinColumn(name = "monkey_id"),
+			foreignKey = @ForeignKey(name = "TM_TRA_FK"),
+			inverseForeignKey = @ForeignKey(name = "TM_MON_FK")
 	)
-	@ForeignKey(name = "TM_TRA_FK", inverseName = "TM_MON_FK")
 	public Set<Monkey> getTrainedMonkeys() {
 		return trainedMonkeys;
 	}

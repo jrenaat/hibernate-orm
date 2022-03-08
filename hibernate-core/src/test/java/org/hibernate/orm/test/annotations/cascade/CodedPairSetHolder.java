@@ -19,7 +19,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Table;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 
 @Entity
 @Table(name = "CODED_PAIR_SET_HOLDER")
@@ -36,8 +36,7 @@ class CodedPairSetHolder implements Serializable {
 	private String code;
 
 	@ElementCollection
-	@JoinTable(name = "CODED_PAIR_HOLDER_PAIR_SET", joinColumns = @JoinColumn(name = "CODED_PAIR_HOLDER_ID"))
-	@ForeignKey(name = "FK_PAIR_SET")
+	@JoinTable(name = "CODED_PAIR_HOLDER_PAIR_SET", joinColumns = @JoinColumn(name = "CODED_PAIR_HOLDER_ID"), foreignKey = @ForeignKey(name = "FK_PAIR_SET"))
 	private final Set<PersonPair> pairs = new HashSet<PersonPair>(0);
 
 	CodedPairSetHolder() {

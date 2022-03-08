@@ -11,9 +11,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-import org.hibernate.annotations.ForeignKey;
+import jakarta.persistence.ForeignKey;
 
 /**
  * Many to one sample using default mapping values
@@ -37,7 +38,7 @@ public class Car {
 	}
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@ForeignKey(name="BODY_COLOR_FK")
+	@JoinColumn(foreignKey = @ForeignKey(name="BODY_COLOR_FK"))
 	public Color getBodyColor() {
 		return bodyColor;
 	}
