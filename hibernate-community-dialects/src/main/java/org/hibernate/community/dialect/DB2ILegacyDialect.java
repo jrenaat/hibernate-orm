@@ -4,8 +4,9 @@
  * License: GNU Lesser General Public License (LGPL), version 2.1 or later.
  * See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
  */
-package org.hibernate.dialect;
+package org.hibernate.community.dialect;
 
+import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.function.CommonFunctionFactory;
 import org.hibernate.dialect.identity.DB2390IdentityColumnSupport;
 import org.hibernate.dialect.identity.DB2IdentityColumnSupport;
@@ -33,21 +34,20 @@ import org.hibernate.sql.exec.spi.JdbcOperation;
  * @author Peter DeGregorio (pdegregorio)
  * @author Christian Beikov
  */
-public class DB2iDialect extends DB2Dialect {
+public class DB2ILegacyDialect extends DB2LegacyDialect {
 
-	private final static DatabaseVersion MINIMUM_VERSION = DatabaseVersion.make( 7, 1 );
-	final static DatabaseVersion DB2_LUW_VERSION = DatabaseVersion.make(11, 1);
+	final static DatabaseVersion DB2_LUW_VERSION9 = DatabaseVersion.make( 9, 0);
 
-	public DB2iDialect(DialectResolutionInfo info) {
+	public DB2ILegacyDialect(DialectResolutionInfo info) {
 		this( info.makeCopy() );
 		registerKeywords( info );
 	}
 
-	public DB2iDialect() {
-		this( MINIMUM_VERSION );
+	public DB2ILegacyDialect() {
+		this( DatabaseVersion.make(7) );
 	}
 
-	public DB2iDialect(DatabaseVersion version) {
+	public DB2ILegacyDialect(DatabaseVersion version) {
 		super(version);
 	}
 
@@ -64,7 +64,7 @@ public class DB2iDialect extends DB2Dialect {
 
 	@Override
 	public DatabaseVersion getDB2Version() {
-		return DB2_LUW_VERSION;
+		return DB2_LUW_VERSION9;
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class DB2iDialect extends DB2Dialect {
 
 	@Override
 	public boolean supportsLateral() {
-		return true;
+		return getVersion().isSameOrAfter( 7, 1 );
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class DB2iDialect extends DB2Dialect {
 			@Override
 			protected <T extends JdbcOperation> SqlAstTranslator<T> buildTranslator(
 					SessionFactoryImplementor sessionFactory, Statement statement) {
-				return new DB2iSqlAstTranslator<>( sessionFactory, statement, getVersion() );
+				return new DB2iLegacySqlAstTranslator<>( sessionFactory, statement, getVersion() );
 			}
 		};
 	}

@@ -4,11 +4,12 @@
  * License: GNU Lesser General Public License (LGPL), version 2.1 or later
  * See the lgpl.txt file in the root directory or http://www.gnu.org/licenses/lgpl-2.1.html
  */
-package org.hibernate.dialect;
+package org.hibernate.community.dialect;
 
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.query.sqm.ComparisonOperator;
 import org.hibernate.query.sqm.FetchClauseType;
@@ -38,9 +39,9 @@ import org.hibernate.sql.exec.spi.JdbcOperation;
  *
  * @author Christian Beikov
  */
-public class DB2SqlAstTranslator<T extends JdbcOperation> extends AbstractSqlAstTranslator<T> {
+public class DB2LegacySqlAstTranslator<T extends JdbcOperation> extends AbstractSqlAstTranslator<T> {
 
-	public DB2SqlAstTranslator(SessionFactoryImplementor sessionFactory, Statement statement) {
+	public DB2LegacySqlAstTranslator(SessionFactoryImplementor sessionFactory, Statement statement) {
 		super( sessionFactory, statement );
 	}
 
@@ -51,13 +52,18 @@ public class DB2SqlAstTranslator<T extends JdbcOperation> extends AbstractSqlAst
 
 	@Override
 	public void visitBooleanExpressionPredicate(BooleanExpressionPredicate booleanExpressionPredicate) {
-		final boolean isNegated = booleanExpressionPredicate.isNegated();
-		if ( isNegated ) {
-			appendSql( "not(" );
+		if ( getDB2Version().isSameOrAfter( 11 ) ) {
+			final boolean isNegated = booleanExpressionPredicate.isNegated();
+			if ( isNegated ) {
+				appendSql( "not(" );
+			}
+			booleanExpressionPredicate.getExpression().accept( this );
+			if ( isNegated ) {
+				appendSql( CLOSE_PARENTHESIS );
+			}
 		}
-		booleanExpressionPredicate.getExpression().accept( this );
-		if ( isNegated ) {
-			appendSql( CLOSE_PARENTHESIS );
+		else {
+			super.visitBooleanExpressionPredicate( booleanExpressionPredicate );
 		}
 	}
 
@@ -132,11 +138,14 @@ public class DB2SqlAstTranslator<T extends JdbcOperation> extends AbstractSqlAst
 		// Percent fetches or ties fetches aren't supported in DB2
 		// According to LegacyDB2LimitHandler, variable limit also isn't supported before 11.1
 		// Check if current query part is already row numbering to avoid infinite recursion
-		return getQueryPartForRowNumbering() != queryPart && ( useOffsetFetchClause( queryPart ) && !isRowsOnlyFetchClauseType( queryPart ) );
+		return getQueryPartForRowNumbering() != queryPart && (
+				useOffsetFetchClause( queryPart ) && !isRowsOnlyFetchClauseType( queryPart )
+						|| getDB2Version().isBefore( 11, 1 ) && ( queryPart.isRoot() && hasLimit() || !( queryPart.getFetchClauseExpression() instanceof Literal ) )
+		);
 	}
 
 	protected boolean supportsOffsetClause() {
-		return true;
+		return getDB2Version().isSameOrAfter( 11, 1 );
 	}
 
 	@Override
@@ -223,6 +232,16 @@ public class DB2SqlAstTranslator<T extends JdbcOperation> extends AbstractSqlAst
 			appendSql( " from final table (" );
 		}
 		return true;
+	}
+
+	@Override
+	protected void renderComparison(Expression lhs, ComparisonOperator operator, Expression rhs) {
+		if ( getDB2Version().isSameOrAfter( 11, 1 ) ) {
+			renderComparisonStandard( lhs, operator, rhs );
+		}
+		else {
+			renderComparisonEmulateDecode( lhs, operator, rhs );
+		}
 	}
 
 	@Override
