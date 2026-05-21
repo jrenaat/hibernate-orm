@@ -848,6 +848,7 @@ public class TokenBasedSQLFormatterImpl implements Formatter {
 				int prevType = prev.getType();
 				// These keywords need space before (: clause keywords, operators, etc.
 				if (prevType == SqlFormatterLexer.SELECT || prevType == SqlFormatterLexer.LATERAL ||
+					prevType == SqlFormatterLexer.FROM || prevType == SqlFormatterLexer.JOIN ||
 					prevType == SqlFormatterLexer.EXISTS || prevType == SqlFormatterLexer.IN ||
 					prevType == SqlFormatterLexer.ALL || prevType == SqlFormatterLexer.ANY ||
 					prevType == SqlFormatterLexer.CONFLICT || prevType == SqlFormatterLexer.ON ||
